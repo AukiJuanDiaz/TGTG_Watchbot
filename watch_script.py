@@ -7,24 +7,41 @@ import os
 
 print("Script execution starts")
 
+# Try to first load credentials from environment
+credentials_remote_loaded = False
+
 try:
     # Credential handling heroku
-    tgtg_email = os.environ['TGTG_EMAIL']
-    print(f"tgtg_email: {tgtg_email}")
+    credentials = dict()
+    credentials['email'] = os.environ['TGTG_EMAIL']
+    print(f"tgtg_email: {credentials['email']}")
+    credentials['password'] = os.environ['TGTG_PW']
+    print(f"tgtg_pw: {credentials['password']}")
+
+    telegram = dict()
+    telegram["bot_chatID"] = os.environ['TELEGRAM_BOT_CHATID']
+    print(f"TELEGRAM_BOT_CHATID: {telegram["bot_chatID"]}")
+    telegram["bot_token"] = os.environ['TELEGRAM_BOT_TOKEN']
+    print(f"TELEGRAM_BOT_TOKEN: {telegram["bot_token"]}")
+
+    credentials_remote_loaded = True
 except:
-    print("Not loading credentials from Heroku...")
+    print("No credentials found in Heroku environment")
 
+if credentials_remote_loaded == False:
+    try:
+        # Credential handling local version
+        # Load tgtg account credentials from a hidden file
+        f = open('telegram.json',)
+        telegram = load(f)
+        f.close()
 
-# Credential handling local version
-# Load tgtg account credentials from a hidden file
-f = open('telegram.json',)
-telegram = load(f)
-f.close()
-
-# Load tgtg account credentials from a hidden file
-f = open('credentials.json',)
-credentials = load(f)
-f.close()
+        # Load tgtg account credentials from a hidden file
+        f = open('credentials.json',)
+        credentials = load(f)
+        f.close()
+    except:
+        print("No files found for local credentials.")
 
 # Create the tgtg client with my credentials
 client = TgtgClient(email=credentials['email'], password=credentials['password'])
