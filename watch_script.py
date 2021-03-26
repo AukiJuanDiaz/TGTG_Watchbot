@@ -114,8 +114,22 @@ def routine_check():
         print(f"{[item['store_name'] for item in new_api_result if item['item_id'] == item_id][0]}:\
          {[item['items_available'] for item in new_api_result if item['item_id'] == item_id][0]}")
 
+def still_alive():
+    message = f"Current time: {time.ctime(time.time())}. The bot is still running. "
+
+    global favourites_in_stock
+
+    list_of_item_ids = [fav['item_id'] for fav in favourites_in_stock]
+    for item_id in list_of_item_ids:
+        message += (f"{[item['store_name'] for item in favourites_in_stock if item['item_id'] == item_id][0]}: {[item['items_available'] for item in favourites_in_stock if item['item_id'] == item_id][0]}")
+
+    telegram_bot_sendtext(message)
+
 # Use schedule to set up a recurrent checking
 schedule.every(3).minutes.do(routine_check)
+schedule.every(12).hours.do(still_alive)
+
+telegram_bot_sendtext("Startup successful")
 
 while True:
     # run_pending
