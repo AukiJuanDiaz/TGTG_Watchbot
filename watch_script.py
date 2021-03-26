@@ -5,6 +5,8 @@ import schedule
 import time
 import os
 
+print("Script execution starts")
+
 try:
     # Credential handling heroku
     tgtg_email = os.environ['TGTG_EMAIL']
@@ -12,7 +14,7 @@ try:
 except:
     print("Not loading credentials from Heroku")
 
-    
+
 # Credential handling local version
 # Load tgtg account credentials from a hidden file
 f = open('telegram.json',)
