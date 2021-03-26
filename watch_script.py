@@ -12,7 +12,7 @@ try:
     tgtg_email = os.environ['TGTG_EMAIL']
     print(f"tgtg_email: {tgtg_email}")
 except:
-    print("Not loading credentials from Heroku.")
+    print("Not loading credentials from Heroku...")
 
 
 # Credential handling local version
