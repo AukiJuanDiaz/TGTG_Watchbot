@@ -19,10 +19,10 @@ try:
     print(f"tgtg_pw: {credentials['password']}")
 
     telegram = dict()
-    telegram["bot_chatID"] = os.environ['TELEGRAM_BOT_CHATID']
-    print(f"TELEGRAM_BOT_CHATID: {telegram["bot_chatID"]}")
-    telegram["bot_token"] = os.environ['TELEGRAM_BOT_TOKEN']
-    print(f"TELEGRAM_BOT_TOKEN: {telegram["bot_token"]}")
+    telegram['bot_chatID'] = os.environ['TELEGRAM_BOT_CHATID']
+    print(f"TELEGRAM_BOT_CHATID: {telegram['bot_chatID']}")
+    telegram['bot_token'] = os.environ['TELEGRAM_BOT_TOKEN']
+    print(f"TELEGRAM_BOT_TOKEN: {telegram['bot_token']}")
 
     credentials_remote_loaded = True
 except:
