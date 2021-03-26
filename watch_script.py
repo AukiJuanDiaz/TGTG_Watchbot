@@ -19,8 +19,10 @@ try:
     print(f"tgtg_pw: {credentials['password']}")
 
     telegram = dict()
-    telegram['bot_chatID'] = os.environ['TELEGRAM_BOT_CHATID']
-    print(f"TELEGRAM_BOT_CHATID: {telegram['bot_chatID']}")
+    telegram['bot_chatID1'] = os.environ['TELEGRAM_BOT_CHATID1']
+    print(f"TELEGRAM_BOT_CHATID1: {telegram['bot_chatID1']}")
+    telegram['bot_chatID2'] = os.environ['TELEGRAM_BOT_CHATID2']
+    print(f"TELEGRAM_BOT_CHATID2: {telegram['bot_chatID2']}")
     telegram['bot_token'] = os.environ['TELEGRAM_BOT_TOKEN']
     print(f"TELEGRAM_BOT_TOKEN: {telegram['bot_token']}")
 
@@ -53,11 +55,23 @@ favourites_in_stock = list()
 # Follow this article to figure out a specific chatID: https://medium.com/@ManHay_Hong/how-to-create-a-telegram-bot-and-send-messages-with-python-4cf314d9fa3e
 def telegram_bot_sendtext(bot_message):
 
-    bot_token = telegram["bot_token"]
-    bot_chatID = telegram["bot_chatID"]
-    send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + bot_chatID + '&parse_mode=Markdown&text=' + bot_message
+    chatIDlist = [telegram["bot_chatID1"], telegram["bot_chatID2"]]
+    for id in chatIDlist:
+        bot_token = telegram["bot_token"]
+        send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + id + '&parse_mode=Markdown&text=' + bot_message
+        response = requests.get(send_text)
 
-    response = requests.get(send_text)
+    return response.json()
+
+def telegram_bot_sendimage(image_url, image_caption=None):
+
+    chatIDlist = [telegram["bot_chatID1"], telegram["bot_chatID2"]]
+    for id in chatIDlist:
+        bot_token = telegram["bot_token"]
+        send_text = 'https://api.telegram.org/bot' + bot_token + '/sendPhoto?chat_id=' + id + '&photo=' + image_url
+        if image_caption != None:
+            send_text += '&caption=' + image_caption
+        response = requests.get(send_text)
 
     return response.json()
 
@@ -72,6 +86,7 @@ def fetch_stock_from_api(api_result):
         current_fav['item_id'] = api_result[i]['item']['item_id']
         current_fav['store_name'] = api_result[i]['store']['store_name']
         current_fav['items_available'] = api_result[i]['items_available']
+        current_fav['category_picture'] = api_result[i]['store']['cover_picture']['current_url']
         new_api_result.append(current_fav)
 
     return new_api_result
@@ -101,9 +116,19 @@ def routine_check():
 
         # Check, if the stock has changed. Send a message if so.
         if new_stock != old_stock:
-            # Prepare a generic string, but with the important info
-            message = f"There was a change in stock for the surprise bags at {[item['store_name'] for item in new_api_result if item['item_id'] == item_id][0] }. The old stock size was {old_stock}, the new stock size is {new_stock}."
-            telegram_bot_sendtext(message)
+            # Check if the stock was replenished, send an encouraging image message
+            if old_stock == 0 and new_stock > 0:
+                message = f"There are new goodie bages at {[item['store_name'] for item in new_api_result if item['item_id'] == item_id][0]}"
+                image = [item['category_picture'] for item in new_api_result if item['item_id'] == item_id][0]
+                telegram_bot_sendimage(image, message)
+            elif old_stock > new_stock:
+                # Prepare a generic string, but with the important info
+                message = f"The number of goodie bags in stock decreased from {old_stock} to {new_stock} at {[item['store_name'] for item in new_api_result if item['item_id'] == item_id][0] }."
+                telegram_bot_sendtext(message)
+            else:
+                # Prepare a generic string, but with the important info
+                message = f"There was a change of number of goodie bags in stock from {old_stock} to {new_stock} at {[item['store_name'] for item in new_api_result if item['item_id'] == item_id][0] }."
+                telegram_bot_sendtext(message)
 
     # Reset the global information with the newest fetch
     favourites_in_stock = new_api_result
@@ -121,15 +146,15 @@ def still_alive():
 
     list_of_item_ids = [fav['item_id'] for fav in favourites_in_stock]
     for item_id in list_of_item_ids:
-        message += (f"{[item['store_name'] for item in favourites_in_stock if item['item_id'] == item_id][0]}: {[item['items_available'] for item in favourites_in_stock if item['item_id'] == item_id][0]}")
+        message += (f"{[item['store_name'] for item in favourites_in_stock if item['item_id'] == item_id][0]}: {[item['items_available'] for item in favourites_in_stock if item['item_id'] == item_id][0]} items available")
 
     telegram_bot_sendtext(message)
 
 # Use schedule to set up a recurrent checking
 schedule.every(3).minutes.do(routine_check)
-schedule.every(12).hours.do(still_alive)
+schedule.every(24).hours.do(still_alive)
 
-telegram_bot_sendtext("Startup successful")
+telegram_bot_sendtext("The bot script has started successfully. The bot checks every 3 minutes, if there is something new at TooGoodToGo. Every 24 hours, the bots sends a 'still alive'-message.")
 
 while True:
     # run_pending
