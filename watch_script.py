@@ -73,9 +73,7 @@ def routine_check():
         # Check, if the stock has changed. Send a message if so.
         if new_stock != old_stock:
             # Prepare a generic string, but with the important info
-            message = f"There was a change in stock for the surprise bags at \
-                        {[item['store_name'] for item in new_api_result if item['item_id'] == item_id][0] }.\
-                        The old stock size was {old_stock}, the new stock size is {new_stock}."
+            message = f"There was a change in stock for the surprise bags at {[item['store_name'] for item in new_api_result if item['item_id'] == item_id][0] }. The old stock size was {old_stock}, the new stock size is {new_stock}."
             telegram_bot_sendtext(message)
 
     # Reset the global information with the newest fetch
@@ -88,7 +86,7 @@ def routine_check():
          {[item['items_available'] for item in new_api_result if item['item_id'] == item_id][0]}")
 
 # Use schedule to set up a recurrent checking
-schedule.every(1).minutes.do(routine_check)
+schedule.every(3).minutes.do(routine_check)
 
 while True:
     # run_pending
