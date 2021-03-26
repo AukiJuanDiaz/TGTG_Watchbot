@@ -3,7 +3,17 @@ from json import load, dump
 import requests
 import schedule
 import time
+import os
 
+try:
+    # Credential handling heroku
+    tgtg_email = os.environ['TGTG_EMAIL']
+    print(f"tgtg_email: {tgtg_email}")
+except:
+    print("Not loading credentials from Heroku")
+
+    
+# Credential handling local version
 # Load tgtg account credentials from a hidden file
 f = open('telegram.json',)
 telegram = load(f)
