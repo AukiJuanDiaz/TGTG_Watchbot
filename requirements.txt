@@ -1,5 +1,4 @@
 tgtg
 schedule
-time
 os
 
