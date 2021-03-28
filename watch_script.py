@@ -5,8 +5,8 @@ import schedule
 import time
 import os
 
-print("Script execution starts")
-
+# For remote deployment, the credentials are stored as environment variables in Heroku
+# Try to load the credentials remotely first. If this false, look for a local file
 # Try to first load credentials from environment
 credentials_remote_loaded = False
 
@@ -51,11 +51,20 @@ client = TgtgClient(email=credentials['email'], password=credentials['password']
 # Init the favourites in stock list as a global variable
 favourites_in_stock = list()
 
-# Helper function: Send a message with the specified telegram bot on the specified chat
-# Follow this article to figure out a specific chatID: https://medium.com/@ManHay_Hong/how-to-create-a-telegram-bot-and-send-messages-with-python-4cf314d9fa3e
-def telegram_bot_sendtext(bot_message):
 
-    chatIDlist = [telegram["bot_chatID1"], telegram["bot_chatID2"]]
+def telegram_bot_sendtext(bot_message, only_to_admin=False):
+    """
+    Helper function: Send a message with the specified telegram bot.
+    It can be specified if both users or only the admin receives the message
+    Follow this article to figure out a specific chatID: https://medium.com/@ManHay_Hong/how-to-create-a-telegram-bot-and-send-messages-with-python-4cf314d9fa3e
+    """
+
+    if only_to_admin:
+        # ChadID1 is the admin
+        chatIDlist = [telegram["bot_chatID1"]]
+    else:
+        chatIDlist = [telegram["bot_chatID1"], telegram["bot_chatID2"]]
+
     for id in chatIDlist:
         bot_token = telegram["bot_token"]
         send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + id + '&parse_mode=Markdown&text=' + bot_message
@@ -64,11 +73,17 @@ def telegram_bot_sendtext(bot_message):
     return response.json()
 
 def telegram_bot_sendimage(image_url, image_caption=None):
-
+    """
+    For sending an image in Telegram, that can also be accompanied by an image caption
+    """
+    # Send the message to both users
     chatIDlist = [telegram["bot_chatID1"], telegram["bot_chatID2"]]
     for id in chatIDlist:
         bot_token = telegram["bot_token"]
+        # Prepare the url for an telegram API call to send a photo
         send_text = 'https://api.telegram.org/bot' + bot_token + '/sendPhoto?chat_id=' + id + '&photo=' + image_url
+
+        # If the argument gets passed, at a caption to the image
         if image_caption != None:
             send_text += '&caption=' + image_caption
         response = requests.get(send_text)
@@ -77,7 +92,7 @@ def telegram_bot_sendimage(image_url, image_caption=None):
 
 def fetch_stock_from_api(api_result):
     """
-    For fideling out the view important information out of the api response
+    For fideling out the few important information out of the api response
     """
     new_api_result = list()
     # Go through all favorites linked to the account,that are returned with the api
@@ -93,7 +108,8 @@ def fetch_stock_from_api(api_result):
 
 def routine_check():
     """
-    Function that gets called via schedule to get the api numbers and send a telegram message in case of a change
+    Function that gets called via schedule every 3 minutes.
+    Retrieves the data from TGTG API and selects the message to send.
     """
 
     # Get the global variable of items in stock
@@ -118,12 +134,15 @@ def routine_check():
         if new_stock != old_stock:
             # Check if the stock was replenished, send an encouraging image message
             if old_stock == 0 and new_stock > 0:
-                message = f"There are new goodie bages at {[item['store_name'] for item in new_api_result if item['item_id'] == item_id][0]}"
+                message = f"There are {new_stock} new goodie bags at {[item['store_name'] for item in new_api_result if item['item_id'] == item_id][0]}"
                 image = [item['category_picture'] for item in new_api_result if item['item_id'] == item_id][0]
                 telegram_bot_sendimage(image, message)
-            elif old_stock > new_stock:
+            elif old_stock > new_stock and new_stock != 0:
                 # Prepare a generic string, but with the important info
-                message = f"The number of goodie bags in stock decreased from {old_stock} to {new_stock} at {[item['store_name'] for item in new_api_result if item['item_id'] == item_id][0] }."
+                message = f" 📉 Decrease from {old_stock} to {new_stock} available goodie bags at {[item['store_name'] for item in new_api_result if item['item_id'] == item_id][0]}."
+                telegram_bot_sendtext(message)
+            elif old_stock > new_stock and new_stock == 0:
+                message = f" ⭕ Sold out! There are no more goodie bags available at {[item['store_name'] for item in new_api_result if item['item_id'] == item_id][0]}."
                 telegram_bot_sendtext(message)
             else:
                 # Prepare a generic string, but with the important info
@@ -140,6 +159,9 @@ def routine_check():
          {[item['items_available'] for item in new_api_result if item['item_id'] == item_id][0]}")
 
 def still_alive():
+    """
+    This function gets called every 24 hours and sends a 'still alive' message to the admin.
+    """
     message = f"Current time: {time.ctime(time.time())}. The bot is still running. "
 
     global favourites_in_stock
@@ -148,12 +170,13 @@ def still_alive():
     for item_id in list_of_item_ids:
         message += (f"{[item['store_name'] for item in favourites_in_stock if item['item_id'] == item_id][0]}: {[item['items_available'] for item in favourites_in_stock if item['item_id'] == item_id][0]} items available")
 
-    telegram_bot_sendtext(message)
+    telegram_bot_sendtext(message, only_to_admin = True)
 
 # Use schedule to set up a recurrent checking
 schedule.every(3).minutes.do(routine_check)
 schedule.every(24).hours.do(still_alive)
 
+# Description of the sercive, that gets send once
 telegram_bot_sendtext("The bot script has started successfully. The bot checks every 3 minutes, if there is something new at TooGoodToGo. Every 24 hours, the bots sends a 'still alive'-message.")
 
 while True:
