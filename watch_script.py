@@ -138,9 +138,11 @@ def routine_check():
                 image = [item['category_picture'] for item in new_api_result if item['item_id'] == item_id][0]
                 telegram_bot_sendimage(image, message)
             elif old_stock > new_stock and new_stock != 0:
-                # Prepare a generic string, but with the important info
-                message = f" 📉 Decrease from {old_stock} to {new_stock} available goodie bags at {[item['store_name'] for item in new_api_result if item['item_id'] == item_id][0]}."
-                telegram_bot_sendtext(message)
+                # customer feedback: This message is not needed
+                pass
+                ## Prepare a generic string, but with the important info
+                # message = f" 📉 Decrease from {old_stock} to {new_stock} available goodie bags at {[item['store_name'] for item in new_api_result if item['item_id'] == item_id][0]}."
+                # telegram_bot_sendtext(message)
             elif old_stock > new_stock and new_stock == 0:
                 message = f" ⭕ Sold out! There are no more goodie bags available at {[item['store_name'] for item in new_api_result if item['item_id'] == item_id][0]}."
                 telegram_bot_sendtext(message)
@@ -177,7 +179,7 @@ schedule.every(3).minutes.do(routine_check)
 schedule.every(24).hours.do(still_alive)
 
 # Description of the sercive, that gets send once
-telegram_bot_sendtext("The bot script has started successfully. The bot checks every 3 minutes, if there is something new at TooGoodToGo. Every 24 hours, the bots sends a 'still alive'-message.")
+telegram_bot_sendtext("The bot script has started successfully. The bot checks every 3 minutes, if there is something new at TooGoodToGo. Every 24 hours, the bots sends a 'still alive'-message.", only_to_admin=True)
 
 while True:
     # run_pending
