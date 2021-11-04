@@ -1,0 +1,15 @@
+{
+    "tgtg": {
+        "email": "YOUREMAIL",
+        "password": "YOURPASSWORD"
+    },
+    "telegram": {
+        "bot_token": "BOTTOKEN",
+        "bot_chatID": CHATID
+    },
+    "location": {
+        "lat": 0.0,
+        "long": 0.0,
+        "range": 30
+    }
+}
