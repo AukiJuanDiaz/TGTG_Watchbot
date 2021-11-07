@@ -141,8 +141,8 @@ def toogoodtogo():
                 # message = f" 📉 Decrease from {old_stock} to {new_stock} available goodie bags at {[item['store_name'] for item in new_api_result if item['item_id'] == item_id][0]}."
                 # telegram_bot_sendtext(message)
             elif old_stock > new_stock and new_stock == 0:
-                message = f" ⭕ Sold out! There are no more goodie bags available at {item['store_name']}."
-                telegram_bot_sendtext(message)
+                # message = f" ⭕ Sold out! There are no more goodie bags available at {item['store_name']}."
+                # telegram_bot_sendtext(message)
                 telegram_bot_delete_message([stock['msg_id'] for stock in tgtg_in_stock if stock['id'] == item['id']][0])
             else:
                 # Prepare a generic string, but with the important info
@@ -227,8 +227,8 @@ def foodsi():
                 # message = f" 📉 Decrease from {old_stock} to {new_stock} available goodie bags at {[item['store_name'] for item in new_api_result if item['id'] == item_id][0]}."
                 # telegram_bot_sendtext(message)
             elif old_stock > new_stock and new_stock == 0:
-                message = f" ⭕ Sold out! There are no more goodie bags available at {item['store_name']}."
-                telegram_bot_sendtext(message)
+                # message = f" ⭕ Sold out! There are no more goodie bags available at {item['store_name']}."
+                # telegram_bot_sendtext(message)
                 telegram_bot_delete_message([stock['msg_id'] for stock in foodsi_in_stock if stock['id'] == item['id']][0])
             else:
                 # Prepare a generic string, but with the important info
