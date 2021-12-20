@@ -9,22 +9,43 @@ import json
 import maya
 import datetime
 import inspect
+import sys
 from urllib.parse import quote
 
 try:
     filename = inspect.getframeinfo(inspect.currentframe()).filename
     path = os.path.dirname(os.path.abspath(filename))
     # Load credentials from a file
-    f = open(os.path.join(path, 'config.json'))
+    f = open(os.path.join(path, 'config.json'), mode='r+')
     config = load(f)
+    if len(sys.argv) == 2:
+        try:
+            client = TgtgClient(email=sys.argv[1])
+            tgtg_creds = client.get_credentials()
+            print(tgtg_creds)
+            config['tgtg'] = tgtg_creds
+            f.seek(0)
+            json.dump(config, f, indent = 4)
+            f.truncate()
+        except:
+            print(traceback.format_exc())
+            exit(1)
     f.close()
 except:
     print("No files found for local credentials.")
     exit(1)
 
-# Create the tgtg client with my credentials
-tgtg_client = TgtgClient(email=config['tgtg']['email'], password=config['tgtg']['password'])
-bot_token = config['telegram']["bot_token"]
+try:
+    # Create the tgtg client with my credentials
+    tgtg_client = TgtgClient(access_token=config['tgtg']['access_token'], refresh_token=config['tgtg']['access_token'], user_id=config['tgtg']['access_token'])
+except:
+    print(f"Failed to obtain TGTG credentials.\nRun \"python3 {sys.argv[0]} <your_email>\" to generate TGTG credentials.")
+    exit(1)
+try:
+    bot_token = config['telegram']["bot_token"]
+except:
+    print(f"Failed to obtain Telegram bot token.\n Put it into config.json.")
+    exit(1)
 
 # Init the favourites in stock list as a global variable
 tgtg_in_stock = list()
@@ -257,7 +278,7 @@ def refresh():
     Retrieves the data from services APIs and selects the messages to send.
     """
     try:
-        toogoodtogo()
+        # toogoodtogo()
         foodsi()
     except:
         print(traceback.format_exc())
