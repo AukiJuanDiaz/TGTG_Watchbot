@@ -15,8 +15,9 @@ Here is a screenshot:
 
 #### Tgtg API
 There is a library wrapped around the API of the tgtg-app. You can find the library and a short documentation [here.](https://pypi.org/project/tgtg/)
-##### How do I set a password for tgtg?
-[click here](https://store.toogoodtogo.com/reset-password)
+##### How do I obtain credentails for tgtg?
+Just run: 
+```python3 watch_script.py <your_email>```
 
 #### Telegram bot
 I used Telegram as the service to notify me, because they are quite supportive for adding your own bots to the platform and provide a rich API. [This article](https://medium.com/@ManHay_Hong/how-to-create-a-telegram-bot-and-send-messages-with-python-4cf314d9fa3e) provides a quick introduction into sending Telegram messages with python.
