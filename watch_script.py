@@ -4,6 +4,7 @@ import requests
 import schedule
 import time
 import os
+from typing import Union
 
 # For remote deployment, the credentials are stored as environment variables in Heroku
 # Try to load the credentials remotely first. If this false, look for a local file
@@ -13,10 +14,13 @@ credentials_remote_loaded = False
 try:
     # Credential handling heroku
     credentials = dict()
-    credentials['email'] = os.environ['TGTG_EMAIL']
-    print(f"tgtg_email: {credentials['email']}")
-    credentials['password'] = os.environ['TGTG_PW']
-    print(f"tgtg_pw: {credentials['password']}")
+    # You can generate credentials by running get_credentials() function
+    credentials['access_token'] = os.environ['TGTG_ACCESS_TOKEN']
+    print(f"tgtg_access_token: {credentials['access_token']}")
+    credentials['refresh_token'] = os.environ['TGTG_REFRESH_TOKEN']
+    print(f"tgtg_refresh_token: {credentials['refresh_token']}")
+    credentials['user_id'] = os.environ['TGTG_USER_ID']
+    print(f"tgtg_user_id: {credentials['user_id']}")
 
     telegram = dict()
     telegram['bot_chatID1'] = os.environ['TELEGRAM_BOT_CHATID1']
@@ -45,11 +49,34 @@ if credentials_remote_loaded == False:
     except:
         print("No files found for local credentials.")
 
-# Create the tgtg client with my credentials
-client = TgtgClient(email=credentials['email'], password=credentials['password'])
+# Create the tgtg client with my credentials (you should generate your own credentials using get_credentials()
+client = TgtgClient(access_token=credentials['access_token'],
+                    refresh_token=credentials['refresh_token'],
+                    user_id=credentials['user_id'])
 
 # Init the favourites in stock list as a global variable
 favourites_in_stock = list()
+
+
+def get_credentials(email: str, to_json: bool = True) -> Union[dict, None]:
+    """
+    Helper function: Get the credentials for a specific account
+    You should run this function only once, then you can build client from the credentials.json file
+    """
+    # Get the credentials from the tgtg API
+    client = TgtgClient(email=email)
+    print('Getting credentials...')
+    print('You should receive an email from tgtg. Please validate the login by clicking the link inside the email.')
+    credentials = client.get_credentials()
+    if to_json:
+        # Save the credentials to a json file
+        f = open('credentials.json', 'w')
+        dump(credentials, f)
+        f.close()
+        print('Credentials saved to credentials.json')
+    else:
+        return credentials
+
 
 
 def telegram_bot_sendtext(bot_message, only_to_admin=False):
