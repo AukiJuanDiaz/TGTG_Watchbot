@@ -1,11 +1,7 @@
 {
-    "tgtg": {
-        "email": "YOUREMAIL",
-        "password": "YOURPASSWORD"
-    },
     "telegram": {
         "bot_token": "BOTTOKEN",
-        "bot_chatID": CHATID
+        "bot_chatID": 0
     },
     "location": {
         "lat": 0.0,
