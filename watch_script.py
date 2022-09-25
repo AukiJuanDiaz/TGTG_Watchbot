@@ -303,11 +303,11 @@ def foodsi():
             # Check if the stock was replenished, send an encouraging image message
             if old_stock == 0 and new_stock > 0:
                 #TODO: tommorrow date
-                message = f"🍽 There are {new_stock} new goodie bags at {item['name']}\n"\
+                message = f"🍽 There are {new_stock} new goodie bags at [{item['name']}]({item['url']})\n"\
                 f"_{item['meal']['description']}_\n"\
                 f"💰 *{item['meal']['price']}PLN*/{item['meal']['original_price']}PLN\n"\
                 f"⏰ {item['opened_at']}-{item['closed_at']}\n"\
-                f"ℹ️ Offer id: {item['id']}\n"\
+                "ℹ️ foodsi.pl"
                 # message += f"\ndebug id: {item['id']}"
                 tg = telegram_bot_sendimage(item['image']['url'], message)
                 try: 
