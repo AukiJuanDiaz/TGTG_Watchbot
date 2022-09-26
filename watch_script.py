@@ -321,15 +321,15 @@ def foodsi():
                 # customer feedback: This message is not needed
                 pass
                 ## Prepare a generic string, but with the important info
-                # message = f" 📉 Decrease from {old_stock} to {new_stock} available goodie bags at {[item['store_name'] for item in new_api_result if item['id'] == item_id][0]}."
+                # message = f" 📉 Decrease from {old_stock} to {new_stock} available goodie bags at {[item['name'] for item in new_api_result if item['id'] == item_id][0]}."
                 # telegram_bot_sendtext(message)
             elif old_stock > new_stock and new_stock == 0:
-                # message = f" ⭕ Sold out! There are no more goodie bags available at {item['store_name']}."
+                # message = f" ⭕ Sold out! There are no more goodie bags available at {item['name']}."
                 # telegram_bot_sendtext(message)
                 telegram_bot_delete_message([stock['msg_id'] for stock in foodsi_in_stock if stock['id'] == item['id']][0])
             else:
                 # Prepare a generic string, but with the important info
-                message = f"There was a change of number of goodie bags in stock from {old_stock} to {new_stock} at {item['store_name']}."
+                message = f"There was a change of number of goodie bags in stock from {old_stock} to {new_stock} at {item['name']}."
                 telegram_bot_sendtext(message)
 
     # Reset the global information with the newest fetch
